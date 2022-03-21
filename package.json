@@ -1,6 +1,6 @@
 {
     "name": "apify-click-events",
-    "version": "1.0.4",
+    "version": "1.0.6",
     "description": "Manage your click events like a boss in the Apify SDK.",
     "main": "dist/index.js",
     "scripts": {
@@ -26,6 +26,7 @@
         "url": "https://github.com/mstephen19/apify-click-events/issues"
     },
     "devDependencies": {
+        "@apify/tsconfig": "^0.1.0",
         "@playwright/test": "^1.20.0",
         "browser-pool": "^3.1.1"
     }
