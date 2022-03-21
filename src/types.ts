@@ -14,7 +14,7 @@ export interface ClickManagerOptions {
     allowDebugger?: boolean;
     enableOnPagesIncluding?: string[];
     blockCommonAds?: boolean;
-    optimize: boolean;
+    optimize?: boolean;
 }
 
 export type MapClickCallback = <T>(page: Page) => Promise<T>;

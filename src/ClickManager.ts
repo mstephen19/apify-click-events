@@ -14,7 +14,7 @@ import { log } from './utils';
 /**
  * Create a new instance to get started! Be sure to check the docs.
  */
-export default class ClickManager implements ClickManagerOptions {
+export default class ClickManager {
     readonly mode: Mode;
     readonly whitelist: string[];
     readonly blacklist: string[];
@@ -35,7 +35,7 @@ export default class ClickManager implements ClickManagerOptions {
         enableOnPagesIncluding = [],
         blockCommonAds = false,
         optimize = false,
-    }: ClickManagerOptions) {
+    }: ClickManagerOptions = {}) {
         if (!enableOnPagesIncluding?.length) console.log('No regular expressions provided in "enableOnPagesIncluding"!');
         if (mode && mode !== WHITELIST && mode !== BLACKLIST) throw new Error('Invalid mode!');
         if (
