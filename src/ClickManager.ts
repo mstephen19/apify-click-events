@@ -1,12 +1,12 @@
 import { PlaywrightCrawlerOptions } from 'apify';
-import { Page } from '@playwright/test';
+import { BrowserContext, Page } from '@playwright/test';
 import { BrowserPoolOptions } from 'browser-pool';
 
 import { script } from './script';
 
 import { ClickManagerOptions, MapClickCallback, Mode } from './types';
 
-import { WHITELIST, BLACKLIST } from './constants';
+import { WHITELIST, BLACKLIST, COMMON_ADS } from './constants';
 import { sleep } from 'apify/build/utils';
 
 import { log } from './utils';
@@ -18,7 +18,9 @@ export default class ClickManager implements ClickManagerOptions {
     readonly blockWindowClickListeners: 0 | 1 | 2;
     readonly blockWindowOpenMethod: boolean;
     readonly allowDebugger: boolean;
-    readonly enableOnPagesIncluding: RegExp[];
+    readonly enableOnPagesIncluding: string[];
+    readonly blockCommonAds: boolean;
+    readonly optimize: boolean;
 
     constructor({
         mode = WHITELIST,
@@ -28,6 +30,8 @@ export default class ClickManager implements ClickManagerOptions {
         blockWindowOpenMethod = false,
         allowDebugger = true,
         enableOnPagesIncluding = [],
+        blockCommonAds = false,
+        optimize = false,
     }: ClickManagerOptions) {
         if (!enableOnPagesIncluding?.length) console.log('No regular expressions provided in "enableOnPagesIncluding"!');
         if (mode && mode !== WHITELIST && mode !== BLACKLIST) throw new Error('Invalid mode!');
@@ -46,6 +50,8 @@ export default class ClickManager implements ClickManagerOptions {
         this.blockWindowOpenMethod = blockWindowOpenMethod ?? false;
         this.allowDebugger = allowDebugger ?? true;
         this.enableOnPagesIncluding = enableOnPagesIncluding || [];
+        this.blockCommonAds = blockCommonAds ?? false;
+        this.optimize = optimize ?? false;
         log('Initialized.');
     }
 
@@ -60,7 +66,9 @@ export default class ClickManager implements ClickManagerOptions {
                 //@ts-ignore
                 postLaunchHooks: [
                     async (_, browserController) => {
-                        for (const browser of browserController.browser.contexts()) {
+                        const promises = [];
+
+                        for (const browser of browserController.browser.contexts() as BrowserContext[]) {
                             const params = {
                                 mode: this.mode,
                                 whitelist: this.whitelist,
@@ -71,8 +79,27 @@ export default class ClickManager implements ClickManagerOptions {
                                 enableOnPagesIncluding: this.enableOnPagesIncluding,
                             };
 
-                            await browser.addInitScript(script, params);
+                            promises.push(
+                                (async () => {
+                                    await browser.addInitScript(script, params);
+
+                                    if (this.blockCommonAds) {
+                                        await browser.route(
+                                            (url) => COMMON_ADS.some((s) => url.hostname.includes(s)),
+                                            async (route) => {
+                                                await route.abort();
+                                            }
+                                        );
+                                    }
+
+                                    if (this.optimize) {
+                                        await browser.route('**/*.{css,jpg,jpeg,png,pdf,zip,svg,gif,woff}', async (route) => await route.abort());
+                                    }
+                                })()
+                            );
                         }
+
+                        await Promise.all(promises);
                     },
                 ],
             },
@@ -103,6 +130,17 @@ export default class ClickManager implements ClickManagerOptions {
             console.log('Current whitelist', window.whitelist);
         }, selectors);
         return sleep(700);
+    }
+
+    /**
+     *
+     * @param page PlayWright/Puppeteer page
+     * @param selector Selector to whitelist, then click
+     */
+    static async whiteListAndClick(page: Page, selector: string) {
+        await this.addToWhiteList(page, [selector]);
+
+        return page.click(selector);
     }
 
     /**
@@ -158,9 +196,10 @@ export default class ClickManager implements ClickManagerOptions {
         const arr: T[] = [];
 
         const selectors = await page.$$(selector);
+
         for (const selector of selectors) {
             await selector.click();
-            let data = null;
+            let data: T = null;
 
             try {
                 data = await func<T>(page);
@@ -171,5 +210,34 @@ export default class ClickManager implements ClickManagerOptions {
         }
 
         return arr;
+    }
+
+    static async click(page: Page, selector: string) {
+        try {
+            await page.evaluate((selector) => {
+                //@ts-ignore
+                if (window.clickManagerMode === 'BLACKLIST') {
+                    //@ts-ignore
+                    const elems = [...window.blacklist.map((s: string) => document.querySelector(s))];
+
+                    for (const elem of elems) {
+                        if (elem.match(selector)) throw new Error("Can't click a blacklisted selector!");
+                    }
+                }
+
+                //@ts-ignore
+                if (window.clickManagerMode === 'WHITELIST') {
+                    //@ts-ignore
+                    const elems = [...window.whitelist.map((s: string) => document.querySelector(s))];
+
+                    if (!elems.some((e: Element) => e.matches(selector))) throw new Error("Selector isn't on the whitelist!");
+                }
+
+                //@ts-ignore
+                document.querySelector(selector).click();
+            }, selector);
+        } catch (err) {
+            throw new Error(`Failed to click ${selector}: ${err}`);
+        }
     }
 }

@@ -1,7 +1,7 @@
 {
     "name": "apify-click-events",
-    "version": "1.0.1",
-    "description": "",
+    "version": "1.0.3",
+    "description": "Manage your click events like a boss in the Apify SDK.",
     "main": "dist/index.js",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1"
@@ -20,6 +20,10 @@
     "repository": {
         "type": "git",
         "url": "https://github.com/mstephen19/apify-click-events.git"
+    },
+    "homepage": "https://github.com/mstephen19/apify-click-events#readme",
+    "bugs": {
+        "url": "https://github.com/mstephen19/apify-click-events/issues"
     },
     "devDependencies": {
         "@playwright/test": "^1.20.0",

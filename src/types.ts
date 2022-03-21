@@ -12,7 +12,9 @@ export interface ClickManagerOptions {
     blockWindowClickListeners?: 0 | 1 | 2;
     blockWindowOpenMethod?: boolean;
     allowDebugger?: boolean;
-    enableOnPagesIncluding?: RegExp[];
+    enableOnPagesIncluding?: string[];
+    blockCommonAds?: boolean;
+    optimize: boolean;
 }
 
 export type MapClickCallback = <T>(page: Page) => Promise<T>;

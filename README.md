@@ -17,7 +17,9 @@
     - [`await ClickManager.addToBlackList(page, selectors)`](#await-clickmanageraddtoblacklistpage-selectors)
     - [`await ClickManager.checkLists(page)`](#await-clickmanagerchecklistspage)
 - [Utilities](#utilities)
-    - [`await ClickManager.mapClick`](#await-clickmanagermapclickpage-selector-callback)
+    - [`await ClickManager.mapClick(page, selector, callback)`](#await-clickmanagermapclickpage-selector-callback)
+    - [`await ClickManager.whiteListAndClick(page, selector)`](#await-clickmanagerwhitelistandclickpage-selector)
+    - [`await ClickManager.click(page, selector)`](#await-clickmanagerclickpage-selector)
 
 ## Installation
 
@@ -39,9 +41,9 @@ const { ClickManager } = require('apify-click-events');
 
 ## About
 
-When scraping a website, though it's not ideal, sometimes you just have to click the page. The issue is that so many sites have click traps which open up ads, new tabs, or do certain actions which you don't want when an element is clicked. This can be a result of an event listener on the window object, or the propogation of the click event on the target element.
+When scraping a website, though it's not ideal, sometimes you just have to automate clicking the page. The issue is that too many sites have click traps which open up ads, new tabs, or do certain actions which you don't want when an element is clicked. This can be a result of an event listener on the window object, or the propogation of the click event on the target element.
 
-With this package, easily whitelist/blacklist elements matching certain selectors to ensure the reliability of your actor's clicks, and to eliminate any errors/retries related to being redirected to another page or triggering an unwanted event.
+With this package, easily whitelist/blacklist elements matching certain selectors to ensure the reliability of your actor's clicks, and to eliminate any errors/retries related to being redirected to another page, triggering an unwanted event, or not being able to click an element.
 
 ## Usage
 
@@ -50,12 +52,16 @@ With this package, easily whitelist/blacklist elements matching certain selector
 | Name   | Type | Default       | Description                                                         |
 | ------ | ---- | ------------- | ------------------------------------------------------------------- |
 | `mode` | Mode | `'WHITELIST'` | The mode of the ClickManager. Either `'WHITELIST'` or `'BLACKLIST'` |
-| `whitelist` | string[] | `[]` | Selectors to whitelist on every page ClickManager is used. Page-specific selectors can be added to just one page load using the `addToWhiteList()` method |
+| `whitelist` | string[] | `[]` | Selectors to whitelist on every page ClickManager is used. Page-specific selectors can be added to just one page load using the `addToWhiteList()` method. |
 | `blacklist` | string[] | `[]` | Selectors to blacklist on every page. Page-specific selectors can be blacklisted using `addToBlackList()` |
 | `blockWindowClickListeners` | number _(0, 1, or 2)_ | `2` | The intensity of blocking of window click listeners. `0` - no blocking. `2` - will only be fired if a whitelisted/non-blacklisted selector is clicked. `3` - no click related listeners will even be added to the window. |
 | `blockWindowOpenMethod` | boolean | `false` | Whether or not to prevent the `window.open` method from firing. |
 | `allowDebugger` | boolean | `true` | Sets the `window.debugger` to `null`, which is usually enough to bypass DevTools blocks. |
-| `enableOnPagesIncluding` | string[] | `[]` | **REQUIRED:** Provide an array of strings. Any links matching any of the strings will get the ClickManager script injected into them. |
+| `enableOnPagesIncluding` | string[] | `[]` | **REQUIRED:** Provide an array of strings. Any links matching any of the strings will get the ClickManager script injected into them. The `blockCommonAds` and `optimize` options still apply to all pages that go through the crawler. |
+| `blockCommonAds` | boolean | `false` | Automatically block any requests the browser makes which matches a pre-made list of common ad providers. |
+| `optimize` | boolean | `false` | Automatically block requests for any unnecessary resources such as CSS, images, and gifs. |
+
+> `whitelist` and `blacklist` expect regular CSS selectors. Special selectors exclusively supported in PlayWright will not be valid.
 
 **Usage:**
 
@@ -122,6 +128,8 @@ Add page-specific selectors to the whitelist. This will do absolutely nothing if
 
 Add page-specific selectors to the blacklist. This will do absolutely nothing if `'WHITELIST'` mode is being used.
 
+> **Note:** When you add a selector using `addToWhiteList` or `addToBlackList`, it is only added to the page, and will not be whitelisted/blacklisted on other pages. The only selectors which are added to the list for every single page are the static ones which you define within _ClickManagerOptions_
+
 ### `await ClickManager.checkLists(page)`
 
 (**page**: _Page_) => `Record<string, string[]>`
@@ -132,7 +140,7 @@ Returns the currently whitelisted/blacklisted selectors for the certain page.
 
 ### `await ClickManager.mapClick(page, selector, callback)`
 
-(**page**: _Page_, **selector**: _string_) => `unknown[]`
+(**page**: _Page_, **selector**: _string_, **callback**: _MapClickCallback_) => `unknown[]`
 
 Super useful when you need to click multiple elements that match the same selector, then collect some data after each click (perhaps due to content dynamically changing on the page).
 
@@ -145,7 +153,23 @@ export type MapClickCallback = <T>(page: Page) => Promise<T>;
 **Usage:**
 
 ```JavaScript
-const arr = await ClickManager.mapClick(page, 'a.button', async (pg) => await pg.title(););
+const arr = await ClickManager.mapClick(page, 'a.button', async (pg) => {
+    const tabTitle = await pg.$('div#tab_title');
+    const title = await tabTitle.textContent();
+    return title;
+});
 
-console.log(arr);
+console.log(arr); // array of all the tab titles
 ```
+
+### `await ClickManager.whiteListAndClick(page, selector)`
+
+(**page**: _Page_, **selector**: _string_) => `Promise<unknown[]>`
+
+Whitelist a selector on the page, and then click it.
+
+### `await ClickManager.click(page, selector)`
+
+(**page**: _Page_, **selector**: _string_) => `Promise<void>`
+
+Different from the PlayWright `page.click()` function. Checks the whitelist/blacklist for whether or not the selector can even be clicked, then clicks it, or throws an error.
