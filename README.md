@@ -148,7 +148,7 @@ Super useful when you need to click multiple elements that match the same select
 The callback function takes the _Page_ as a parameter (post-click), and expects some value to be returned from it. Once all the selectors have been looped through and clicked, the results will be returned as an array.
 
 ```TypeScript
-export type MapClickCallback = <T>(page: Page) => Promise<T>;
+export type MapClickCallback = (page: Page) => Promise<unknown>;
 ```
 
 **Usage:**

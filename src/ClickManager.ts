@@ -195,17 +195,17 @@ export default class ClickManager {
      * @param func Callback to run after each element is clicked
      * @returns Array of the data you returned back.
      */
-    static async mapClick<T>(page: Page, selector: string, func: MapClickCallback): Promise<T[]> {
-        const arr: T[] = [];
+    static async mapClick(page: Page, selector: string, func: MapClickCallback): Promise<unknown[]> {
+        const arr: unknown[] = [];
 
         const selectors = await page.$$(selector);
 
         for (const selector of selectors) {
             await selector.click();
-            let data: T = null;
+            let data = null;
 
             try {
-                data = await func<T>(page);
+                data = await func(page);
                 arr.push(data);
             } catch (err) {
                 throw new Error(`Error when running callback: ${err}`);

@@ -17,4 +17,4 @@ export interface ClickManagerOptions {
     optimize?: boolean;
 }
 
-export type MapClickCallback = <T>(page: Page) => Promise<T>;
+export type MapClickCallback = (page: Page) => Promise<unknown>;
