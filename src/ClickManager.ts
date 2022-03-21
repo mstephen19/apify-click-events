@@ -1,5 +1,5 @@
 import { PlaywrightCrawlerOptions } from 'apify';
-import { BrowserContext, Page } from '@playwright/test';
+import { BrowserContext, Page } from 'playwright';
 import { BrowserPoolOptions } from 'browser-pool';
 
 import { script } from './script';

@@ -1,6 +1,6 @@
 {
     "name": "apify-click-events",
-    "version": "1.0.8",
+    "version": "1.1.2",
     "description": "Manage your click events like a boss in the Apify SDK.",
     "main": "dist/index.js",
     "scripts": {
@@ -14,10 +14,10 @@
     "license": "ISC",
     "author": "Matt Stephens",
     "dependencies": {
-        "@playwright/test": "^1.20.0",
         "apify": "^2.2.2",
         "browser-pool": "^3.1.1",
-        "console-log-colors": "^0.2.3"
+        "console-log-colors": "^0.2.3",
+        "playwright": "^1.20.0"
     },
     "repository": {
         "type": "git",
