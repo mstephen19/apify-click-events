@@ -14,7 +14,7 @@ import { log } from './utils';
 /**
  * Create a new instance to get started! Be sure to check the docs.
  */
-export default class ClickManager {
+export default class ClickManager implements ClickManagerOptions {
     readonly mode: Mode;
     readonly whitelist: string[];
     readonly blacklist: string[];
@@ -24,6 +24,7 @@ export default class ClickManager {
     readonly enableOnPagesIncluding: string[];
     readonly blockCommonAds: boolean;
     readonly optimize: boolean;
+    readonly stopClickPropogation: boolean;
 
     constructor({
         mode = WHITELIST,
@@ -35,6 +36,7 @@ export default class ClickManager {
         enableOnPagesIncluding = [],
         blockCommonAds = false,
         optimize = false,
+        stopClickPropogation = true,
     }: ClickManagerOptions = {}) {
         if (!enableOnPagesIncluding?.length) console.log('No regular expressions provided in "enableOnPagesIncluding"!');
         if (mode && mode !== WHITELIST && mode !== BLACKLIST) throw new Error('Invalid mode!');
@@ -55,6 +57,7 @@ export default class ClickManager {
         this.enableOnPagesIncluding = enableOnPagesIncluding || [];
         this.blockCommonAds = blockCommonAds ?? false;
         this.optimize = optimize ?? false;
+        this.stopClickPropogation = stopClickPropogation ?? true;
         log('Initialized.');
     }
 
@@ -80,6 +83,7 @@ export default class ClickManager {
                                 blockWindowOpenMethod: this.blockWindowOpenMethod,
                                 allowDebugger: this.allowDebugger,
                                 enableOnPagesIncluding: this.enableOnPagesIncluding,
+                                stopClickPropogation: this.stopClickPropogation,
                             };
 
                             promises.push(
@@ -260,5 +264,16 @@ export default class ClickManager {
                 console.log('Page attempted to open new window with window.open');
             };
         });
+    }
+
+    static async displayHiddenElement(page: Page, selector: string) {
+        await page.evaluate((selector) => {
+            const elem = document.querySelector(selector);
+            elem.className += ' open active';
+            //@ts-ignore
+            elem.style.visibility = 'visible';
+            //@ts-ignore
+            elem.style.display = 'block';
+        }, selector);
     }
 }

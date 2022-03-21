@@ -1,4 +1,4 @@
-export const script = ({ mode, whitelist, blacklist, blockWindowClickListeners, blockWindowOpenMethod, allowDebugger, enableOnPagesIncluding }) => {
+export const script = ({ mode, whitelist, blacklist, blockWindowClickListeners, blockWindowOpenMethod, allowDebugger, enableOnPagesIncluding, stopClickPropogation }) => {
     (() => {
         const url = window.location.href;
 
@@ -14,6 +14,8 @@ export const script = ({ mode, whitelist, blacklist, blockWindowClickListeners, 
         window.blacklist = blacklist;
         //@ts-ignore
         window.clickManagerMode = mode;
+        //@ts-ignore
+        window.stopClickPropogation = stopClickPropogation;
 
         // All listeners to target
         const toBlock = ['click', 'mousedown', 'mouseup', 'pointerdown', 'pointerup'];
@@ -94,7 +96,7 @@ export const script = ({ mode, whitelist, blacklist, blockWindowClickListeners, 
 
                             // Prevent the possibility of the event propogating to other elements and firing other events
                             //@ts-ignore
-                            if (!elem.listenerAdded) {
+                            if (!elem.listenerAdded && window.stopClickPropogation) {
                                 elem.addEventListener('click', function (e) {
                                     e.stopPropagation();
                                 });

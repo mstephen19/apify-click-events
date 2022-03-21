@@ -15,6 +15,7 @@ export interface ClickManagerOptions {
     enableOnPagesIncluding?: string[];
     blockCommonAds?: boolean;
     optimize?: boolean;
+    stopClickPropogation?: boolean;
 }
 
 export type MapClickCallback = (page: Page) => Promise<unknown>;

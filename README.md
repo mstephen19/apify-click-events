@@ -61,6 +61,7 @@ With this package, easily whitelist/blacklist elements matching certain selector
 | `enableOnPagesIncluding` | string[] | `[]` | **REQUIRED:** Provide an array of strings. Any links matching any of the strings will get the ClickManager script injected into them. The `blockCommonAds` and `optimize` options still apply to all pages that go through the crawler. |
 | `blockCommonAds` | boolean | `false` | Automatically block any requests the browser makes which matches a pre-made list of common ad providers. |
 | `optimize` | boolean | `false` | Automatically block requests for any unnecessary resources such as CSS, images, and gifs. |
+| `stopClickPropogation` | boolean | `true` | Stop whitelisted clicks from propogating into other elements. Sometimes needs to be `false`. |
 
 > `whitelist` and `blacklist` expect regular CSS selectors. Special selectors exclusively supported in PlayWright will not be valid.
 
@@ -81,7 +82,7 @@ Within your main file, first instantiate an instance of the ClickManager class w
 const { ClickManager, modes } = require('apify-click-events');
 
 Apify.main(async () => {
-    // Instantiate the class with your custom optionsr
+    // Instantiate the class with your custom options
     const clickManager = new ClickManager({
         mode: modes.BLACKLIST,
         blacklist: ['#accept-choices'],
@@ -180,3 +181,9 @@ Different from the PlayWright `page.click()` function. Checks the whitelist/blac
 (**page**: _Page_) => `Promise<void>`
 
 Rather than blocking `window.open` on all pages, you can set `blockWindowOpenMethod` in _ClickManagerOptions_ to `false`, and use this method on a page prior to doing any clicks that might result in `window.open` being called.
+
+### `await ClickManager.displayHiddenElement(page, selector)`
+
+(**page**: _Page_, **selector**: _string_) => `Promise<void>`
+
+Sometimes, instead of actually clicking the element in order to make is visible on the page, all you need to do is add the "active" or "open" classes, or set its "visibility" to "visible" or "display" to "block". Use this utility to do all four of those things at once to the first element on the page matching the specified selector.
