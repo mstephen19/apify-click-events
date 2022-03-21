@@ -17,6 +17,10 @@
         "apify": "^2.2.2",
         "console-log-colors": "^0.2.3"
     },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/mstephen19/apify-click-events.git"
+    },
     "devDependencies": {
         "@playwright/test": "^1.20.0",
         "browser-pool": "^3.1.1"

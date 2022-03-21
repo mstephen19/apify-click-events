@@ -1,5 +1,9 @@
 # ClickManager
 
+[![TypeScript](https://badges.frapsoft.com/typescript/love/typescript.svg?v=101)](https://github.com/ellerbrock/typescript-badges/)
+
+
+
 ## Table of Contents
 
 - [Installation](#installation)
@@ -12,6 +16,8 @@
     - [`await ClickManager.addToWhiteList(page, selectors)`](#await-clickmanageraddtowhitelistpage-selectors)
     - [`await ClickManager.addToBlackList(page, selectors)`](#await-clickmanageraddtoblacklistpage-selectors)
     - [`await ClickManager.checkLists(page)`](#await-clickmanagerchecklistspage)
+- [Utilities](#utilities)
+    - [`await ClickManager.mapClick`](#await-clickmanagermapclickpage-selector-callback)
 
 ## Installation
 
