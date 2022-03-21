@@ -20,6 +20,7 @@
     - [`await ClickManager.mapClick(page, selector, callback)`](#await-clickmanagermapclickpage-selector-callback)
     - [`await ClickManager.whiteListAndClick(page, selector)`](#await-clickmanagerwhitelistandclickpage-selector)
     - [`await ClickManager.click(page, selector)`](#await-clickmanagerclickpage-selector)
+    - [`await ClickManager.blockWindowOpenMethod(page)`](#await-clickmanagerblockwindowopenmethodpage)
 
 ## Installation
 
@@ -173,3 +174,9 @@ Whitelist a selector on the page, and then click it.
 (**page**: _Page_, **selector**: _string_) => `Promise<void>`
 
 Different from the PlayWright `page.click()` function. Checks the whitelist/blacklist for whether or not the selector can even be clicked, then clicks it, or throws an error.
+
+### `await ClickManager.blockWindowOpenMethod(page)`
+
+(**page**: _Page_) => `Promise<void>`
+
+Rather than blocking `window.open` on all pages, you can set `blockWindowOpenMethod` in _ClickManagerOptions_ to `false`, and use this method on a page prior to doing any clicks that might result in `window.open` being called.

@@ -11,6 +11,9 @@ import { sleep } from 'apify/build/utils';
 
 import { log } from './utils';
 
+/**
+ * Create a new instance to get started! Be sure to check the docs.
+ */
 export default class ClickManager implements ClickManagerOptions {
     readonly mode: Mode;
     readonly whitelist: string[];
@@ -108,7 +111,7 @@ export default class ClickManager implements ClickManagerOptions {
 
     /**
      *
-     * @param page PlayWright/Puppeteer page.
+     * @param page PlayWright page.
      * Wait for the script to be injected before doing anything else.
      */
     static async waitForInject(page: Page) {
@@ -118,7 +121,7 @@ export default class ClickManager implements ClickManagerOptions {
 
     /**
      *
-     * @param page PlayWright/Puppeteer page
+     * @param page PlayWright page
      * @param selectors Array of selectors
      * Add to the page's whitelisted selectors to be able to click them
      */
@@ -134,7 +137,7 @@ export default class ClickManager implements ClickManagerOptions {
 
     /**
      *
-     * @param page PlayWright/Puppeteer page
+     * @param page PlayWright page
      * @param selector Selector to whitelist, then click
      */
     static async whiteListAndClick(page: Page, selector: string) {
@@ -145,7 +148,7 @@ export default class ClickManager implements ClickManagerOptions {
 
     /**
      *
-     * @param page PlayWright/Puppeteer page
+     * @param page PlayWright page
      * @param selectors Array of selectors
      * Add to the page's blacklisted selectors to block the ability to click them
      */
@@ -161,7 +164,7 @@ export default class ClickManager implements ClickManagerOptions {
 
     /**
      * Get a list of all the currently whitelisted/blacklisted selectors
-     * @param page PlayWright/Puppeteer page
+     * @param page PlayWright page
      */
     static async checkLists(page: Page) {
         const lists = await page.evaluate(() => {
@@ -187,7 +190,7 @@ export default class ClickManager implements ClickManagerOptions {
 
     /**
      *
-     * @param page PlayWright/Puppeteer page
+     * @param page PlayWright page
      * @param selector Selector where multiple
      * @param func Callback to run after each element is clicked
      * @returns Array of the data you returned back.
@@ -212,6 +215,11 @@ export default class ClickManager implements ClickManagerOptions {
         return arr;
     }
 
+    /**
+     *
+     * @param page PlayWright page
+     * @param selector
+     */
     static async click(page: Page, selector: string) {
         try {
             await page.evaluate((selector) => {
@@ -239,5 +247,18 @@ export default class ClickManager implements ClickManagerOptions {
         } catch (err) {
             throw new Error(`Failed to click ${selector}: ${err}`);
         }
+    }
+
+    /**
+     * Block the window.open method on just one page
+     * @param page PlayWright page
+     */
+    static async blockWindowOpenMethod(page: Page) {
+        await page.evaluate(() => {
+            //@ts-ignore
+            window.open = function () {
+                console.log('Page attempted to open new window with window.open');
+            };
+        });
     }
 }

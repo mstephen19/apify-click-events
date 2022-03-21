@@ -1,6 +1,6 @@
 {
     "name": "apify-click-events",
-    "version": "1.0.3",
+    "version": "1.0.4",
     "description": "Manage your click events like a boss in the Apify SDK.",
     "main": "dist/index.js",
     "scripts": {
