@@ -84,7 +84,7 @@ Apify.main(async () => {
     // Instantiate the class with your custom optionsr
     const clickManager = new ClickManager({
         mode: modes.BLACKLIST,
-        whitelist: ['#accept-choices'],
+        blacklist: ['#accept-choices'],
         blockWindowOpenMethod: true,
         enableOnPagesIncluding: ['w3schools'],
     });
