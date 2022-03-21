@@ -2,7 +2,7 @@
 
 [![TypeScript](https://badges.frapsoft.com/typescript/love/typescript.svg?v=101)](https://github.com/ellerbrock/typescript-badges/)
 
-
+![npm](https://img.shields.io/npm/v/apify-click-events?style=plastic)
 
 ## Table of Contents
 
