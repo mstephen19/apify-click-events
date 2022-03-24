@@ -6,21 +6,22 @@
 
 ## Table of Contents
 
-- [Installation](#installation)
-- [Importing](#importing)
-- [About](#about)
-- [Usage](#usage)
-    - [`new ClickManager(options)`](#new-clickmanageroptions)
-    - [Injecting the script using `injectScripts()`](#injecting-the-script-using-injectscripts)
-    - [`await ClickManager.waitForInject(page)`](#await-clickmanagerwaitforinjectpage)
-    - [`await ClickManager.addToWhiteList(page, selectors)`](#await-clickmanageraddtowhitelistpage-selectors)
-    - [`await ClickManager.addToBlackList(page, selectors)`](#await-clickmanageraddtoblacklistpage-selectors)
-    - [`await ClickManager.checkLists(page)`](#await-clickmanagerchecklistspage)
-- [Utilities](#utilities)
-    - [`await ClickManager.mapClick(page, selector, callback)`](#await-clickmanagermapclickpage-selector-callback)
-    - [`await ClickManager.whiteListAndClick(page, selector)`](#await-clickmanagerwhitelistandclickpage-selector)
-    - [`await ClickManager.click(page, selector)`](#await-clickmanagerclickpage-selector)
-    - [`await ClickManager.blockWindowOpenMethod(page)`](#await-clickmanagerblockwindowopenmethodpage)
+-   [Installation](#installation)
+-   [Importing](#importing)
+-   [About](#about)
+-   [Usage](#usage)
+    -   [`new ClickManager(options)`](#new-clickmanageroptions)
+    -   [Injecting the script using `injectScripts()`](#injecting-the-script-using-injectscripts)
+    -   [`await ClickManager.waitForInject(page, removeElement)`](#await-clickmanagerwaitforinjectpage-removeelement)
+    -   [`await ClickManager.addToWhiteList(page, selectors)`](#await-clickmanageraddtowhitelistpage-selectors)
+    -   [`await ClickManager.addToBlackList(page, selectors)`](#await-clickmanageraddtoblacklistpage-selectors)
+    -   [`await ClickManager.checkLists(page)`](#await-clickmanagerchecklistspage)
+-   [Utilities](#utilities)
+    -   [`await ClickManager.mapClick(page, selector, callback)`](#await-clickmanagermapclickpage-selector-callback)
+    -   [`await ClickManager.whiteListAndClick(page, selector, option)`](#await-clickmanagerwhitelistandclickpage-selector-option)
+    -   [`await ClickManager.click(page, selector)`](#await-clickmanagerclickpage-selector)
+    -   [`await ClickManager.blockWindowOpenMethod(page)`](#await-clickmanagerblockwindowopenmethodpage)
+    -   [`await ClickManager.displayHiddenElement(page, selector)`](#await-clickmanagerdisplayhiddenelementpage-selector)
 
 ## Installation
 
@@ -31,11 +32,13 @@ npm i apify-click-events
 ## Importing
 
 ES6+
+
 ```TypeScript
 import { ClickManager } from 'apify-click-events';
 ```
 
 ES5-
+
 ```JavaScript
 const { ClickManager } = require('apify-click-events');
 ```
@@ -50,25 +53,30 @@ With this package, easily whitelist/blacklist elements matching certain selector
 
 ### `new ClickManager(options)`
 
-| Name   | Type | Default       | Description                                                         |
-| ------ | ---- | ------------- | ------------------------------------------------------------------- |
-| `mode` | Mode | `'WHITELIST'` | The mode of the ClickManager. Either `'WHITELIST'` or `'BLACKLIST'` |
-| `whitelist` | string[] | `[]` | Selectors to whitelist on every page ClickManager is used. Page-specific selectors can be added to just one page load using the `addToWhiteList()` method. |
-| `blacklist` | string[] | `[]` | Selectors to blacklist on every page. Page-specific selectors can be blacklisted using `addToBlackList()` |
-| `blockWindowClickListeners` | number _(0, 1, or 2)_ | `2` | The intensity of blocking of window click listeners. `0` - no blocking. `2` - will only be fired if a whitelisted/non-blacklisted selector is clicked. `3` - no click related listeners will even be added to the window. |
-| `blockWindowOpenMethod` | boolean | `false` | Whether or not to prevent the `window.open` method from firing. |
-| `allowDebugger` | boolean | `true` | Sets the `window.debugger` to `null`, which is usually enough to bypass DevTools blocks. |
-| `enableOnPagesIncluding` | string[] | `[]` | **REQUIRED:** Provide an array of strings. Any links matching any of the strings will get the ClickManager script injected into them. The `blockCommonAds` and `optimize` options still apply to all pages that go through the crawler. |
-| `blockCommonAds` | boolean | `false` | Automatically block any requests the browser makes which matches a pre-made list of common ad providers. |
-| `optimize` | boolean | `false` | Automatically block requests for any unnecessary resources such as CSS, images, and gifs. |
-| `stopClickPropogation` | boolean | `true` | Stop whitelisted clicks from propogating into other elements. Sometimes needs to be `false`. |
+| Name                        | Type                  | Default       | Description                                                                                                                                                                                                                             |
+| --------------------------- | --------------------- | ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mode`                      | Mode                  | `'WHITELIST'` | The mode of the ClickManager. Either `'WHITELIST'` or `'BLACKLIST'`                                                                                                                                                                     |
+| `whitelist`                 | string[]              | `[]`          | Selectors to whitelist on every page ClickManager is used. Page-specific selectors can be added to just one page load using the `addToWhiteList()` method.                                                                              |
+| `blacklist`                 | string[]              | `[]`          | Selectors to blacklist on every page. Page-specific selectors can be blacklisted using `addToBlackList()`                                                                                                                               |
+| `blockWindowClickListeners` | number _(0, 1, or 2)_ | `2`           | The intensity of blocking of window click listeners. `0` - no blocking. `2` - will only be fired if a whitelisted/non-blacklisted selector is clicked. `3` - no click related listeners will even be added to the window.               |
+| `blockWindowOpenMethod`     | boolean               | `false`       | Whether or not to prevent the `window.open` method from firing.                                                                                                                                                                         |
+| `allowDebugger`             | boolean               | `true`        | Sets the `window.debugger` to `null`, which is usually enough to bypass DevTools blocks.                                                                                                                                                |
+| `enableOnPagesIncluding`    | string[]              | `[]`          | **REQUIRED:** Provide an array of strings. Any links matching any of the strings will get the ClickManager script injected into them. The `blockCommonAds` and `optimize` options still apply to all pages that go through the crawler. |
+| `blockCommonAds`            | boolean               | `false`       | Automatically block any requests the browser makes which matches a pre-made list of common ad providers.                                                                                                                                |
+| `optimize`                  | boolean               | `false`       | Automatically block requests for any unnecessary resources such as CSS, images, and gifs.                                                                                                                                               |
+| `stopClickPropogation`      | boolean               | `true`        | Stop whitelisted clicks from propogating into other elements. Sometimes needs to be `false`.                                                                                                                                            |
 
 > `whitelist` and `blacklist` expect regular CSS selectors. Special selectors exclusively supported in PlayWright will not be valid.
 
 **Usage:**
 
 ```JavaScript
-const clickManager = new ClickManager({ whitelist: ['div.button-red'], blockWindowClickListeners: 1, enableOnPagesIncluding: ['*'] })
+const clickManager = new ClickManager({
+    whitelist: ['div.button-red'],
+    blockWindowClickListeners: 1,
+    enableOnPagesIncluding: ['*'],
+    stopClickPropogation: false,
+});
 ```
 
 > **Note:** If you want to use ClickManager on all pages, just use `'*'` within your `enableOnPagesIncluding` array. It will match everything.
@@ -112,11 +120,13 @@ Apify.main(async () => {
 });
 ```
 
-### `await ClickManager.waitForInject(page)`
+### `await ClickManager.waitForInject(page, removeElement)`
 
-(**page**: _Page_) => `Promise<void>`
+(**page**: _Page_, **removeElement**?: _boolean_) => `Promise<void>`
 
 Waits for ClickManager's script to be injected, then logs a confirmation once it's been loaded. This will throw an error if the page's `window.location.url` doesn't match any of the `enableOnPagesIncluding` strings.
+
+`removeElement` defaults to `false`. This usually isn't necessary to set, but there is a chance that the status element will cause issues. If so, set the second parameter to `true.`
 
 ### `await ClickManager.addToWhiteList(page, selectors)`
 
@@ -142,7 +152,7 @@ Returns the currently whitelisted/blacklisted selectors for the certain page.
 
 ### `await ClickManager.mapClick(page, selector, callback)`
 
-(**page**: _Page_, **selector**: _string_, **callback**: _MapClickCallback_) => `unknown[]`
+(**page**: _Page_, **selector**: _string_, **callback**: _MapClickCallback_) => `Promise<unknown[]>`
 
 Super useful when you need to click multiple elements that match the same selector, then collect some data after each click (perhaps due to content dynamically changing on the page).
 
@@ -164,11 +174,11 @@ const arr = await ClickManager.mapClick(page, 'a.button', async (pg) => {
 console.log(arr); // array of all the tab titles
 ```
 
-### `await ClickManager.whiteListAndClick(page, selector)`
+### `await ClickManager.whiteListAndClick(page, selector, option)`
 
-(**page**: _Page_, **selector**: _string_) => `Promise<unknown[]>`
+(**page**: _Page_, **selector**: _string_, **option**?: _'PLAYWRIGHT' | 'BROWSER'_) => `Promise<void>`
 
-Whitelist a selector on the page, and then click it.
+Whitelist a selector on the page, and then click it. The `option` field defines how the click should be performed.
 
 ### `await ClickManager.click(page, selector)`
 
@@ -182,8 +192,8 @@ Different from the PlayWright `page.click()` function. Checks the whitelist/blac
 
 Rather than blocking `window.open` on all pages, you can set `blockWindowOpenMethod` in _ClickManagerOptions_ to `false`, and use this method on a page prior to doing any clicks that might result in `window.open` being called.
 
-### `await ClickManager.displayHiddenElement(page, selector)`
+### `await ClickManager.displayHiddenElement(page, selector, classNames)`
 
-(**page**: _Page_, **selector**: _string_) => `Promise<void>`
+(**page**: _Page_, **selector**: _string_, **classNames**?: _string_) => `Promise<void>`
 
-Sometimes, instead of actually clicking the element in order to make is visible on the page, all you need to do is add the "active" or "open" classes, or set its "visibility" to "visible" or "display" to "block". Use this utility to do all four of those things at once to the first element on the page matching the specified selector.
+Sometimes, instead of actually clicking the element in order to make is visible on the page, all you need to do is add the "active", "open", or "show" class names, or set its "visibility" to "visible" or "display" to "block". Use this utility to do all four of those things at once to the first element on the page matching the specified selector. Add extra class names to the element with `classNames` (usually not necessary).

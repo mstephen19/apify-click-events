@@ -63,6 +63,7 @@ export default class ClickManager implements ClickManagerOptions {
 
     /**
      * The magic.
+     *
      * @returns An object to be spread within your crawler's configuration options
      *
      */
@@ -114,20 +115,28 @@ export default class ClickManager implements ClickManagerOptions {
     }
 
     /**
-     *
-     * @param page PlayWright page.
      * Wait for the script to be injected before doing anything else.
+     *
+     * @param page PlayWright page
+     * @param removeElement Whether or not to remove the ClickManager status element from the page (in case it's causing issues). Default false
      */
-    static async waitForInject(page: Page) {
+    static async waitForInject(page: Page, removeElement = false) {
         await page.waitForSelector('#clickManagerReady');
+
+        if (removeElement) {
+            await page.evaluate(() => {
+                document.querySelector('#clickManagerReady').remove();
+            });
+        }
+
         log('Script injected.');
     }
 
     /**
+     * Add to the page's whitelisted selectors to be able to click them
      *
      * @param page PlayWright page
      * @param selectors Array of selectors
-     * Add to the page's whitelisted selectors to be able to click them
      */
     static async addToWhiteList(page: Page, selectors: string[]) {
         await page.evaluate((selectors) => {
@@ -143,18 +152,21 @@ export default class ClickManager implements ClickManagerOptions {
      *
      * @param page PlayWright page
      * @param selector Selector to whitelist, then click
+     * @param option 'PLAYWRIGHT' or 'BROWSER'. Defines how to run the click operation.
      */
-    static async whiteListAndClick(page: Page, selector: string) {
+    static async whiteListAndClick(page: Page, selector: string, option?: 'PLAYWRIGHT' | 'BROWSER') {
         await this.addToWhiteList(page, [selector]);
 
-        return page.click(selector);
+        if (!option || option === 'PLAYWRIGHT') return page.click(selector);
+        //@ts-ignore
+        return page.evaluate((selector) => document.querySelector(selector).click(), selector);
     }
 
     /**
+     * Add to the page's blacklisted selectors to block the ability to click them
      *
      * @param page PlayWright page
      * @param selectors Array of selectors
-     * Add to the page's blacklisted selectors to block the ability to click them
      */
     static async addToBlackList(page: Page, selectors: string[]) {
         await page.evaluate((selectors) => {
@@ -168,6 +180,7 @@ export default class ClickManager implements ClickManagerOptions {
 
     /**
      * Get a list of all the currently whitelisted/blacklisted selectors
+     *
      * @param page PlayWright page
      */
     static async checkLists(page: Page) {
@@ -255,6 +268,7 @@ export default class ClickManager implements ClickManagerOptions {
 
     /**
      * Block the window.open method on just one page
+     *
      * @param page PlayWright page
      */
     static async blockWindowOpenMethod(page: Page) {
@@ -266,14 +280,23 @@ export default class ClickManager implements ClickManagerOptions {
         });
     }
 
-    static async displayHiddenElement(page: Page, selector: string) {
-        await page.evaluate((selector) => {
-            const elem = document.querySelector(selector);
-            elem.className += ' open active';
-            //@ts-ignore
-            elem.style.visibility = 'visible';
-            //@ts-ignore
-            elem.style.display = 'block';
-        }, selector);
+    /**
+     *
+     * @param page PlayWright page
+     * @param selector Hidden selector to display on the page
+     * @param classNames Extra class names to give the element other than the defaults of 'open active show'. Separate these by spaces
+     */
+    static async displayHiddenElement(page: Page, selector: string, classNames: string = '') {
+        await page.evaluate(
+            ({ selector, classNames }) => {
+                const elem = document.querySelector(selector);
+                elem.className += ` open active show ${classNames}`;
+                //@ts-ignore
+                elem.style.visibility = 'visible';
+                //@ts-ignore
+                elem.style.display = 'block';
+            },
+            { selector, classNames }
+        );
     }
 }
